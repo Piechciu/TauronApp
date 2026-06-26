@@ -12,17 +12,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect src changes
+        id: changes
+        run: |
+          git diff --name-only origin/main...HEAD | grep -q '^src/' \
+            && echo "src=true" >> $GITHUB_OUTPUT \
+            || echo "src=false" >> $GITHUB_OUTPUT
 
       - name: Setup .NET
+        if: steps.changes.outputs.src == 'true'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
       - name: Restore
+        if: steps.changes.outputs.src == 'true'
         run: dotnet restore src/TauronApp.slnx
 
       - name: Build
+        if: steps.changes.outputs.src == 'true'
         run: dotnet build src/TauronApp.slnx --no-restore --configuration Release
 
       - name: Test
+        if: steps.changes.outputs.src == 'true'
         run: dotnet test src/TauronApp.slnx --no-build --configuration Release
