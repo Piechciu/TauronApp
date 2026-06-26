@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="TauronApp.Tests/TauronApp.Tests.csproj" />
+  <Project Path="TauronApp/TauronApp.csproj" />
+</Solution>
