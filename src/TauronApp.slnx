@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="TauronApp.Tests/TauronApp.Tests.csproj" />
   <Project Path="TauronApp/TauronApp.csproj" />
+  <Project Path="TauronApp.Calculator/TauronApp.Calculator.csproj" />
+  <Project Path="TauronApp.Calculator.Tests/TauronApp.Calculator.Tests.csproj" />
 </Solution>

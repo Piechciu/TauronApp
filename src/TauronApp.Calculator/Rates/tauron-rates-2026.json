@@ -1,0 +1,143 @@
+{
+  "year": 2026,
+  "tariffs": [
+    {
+      "id": "G11",
+      "zones": [
+        {
+          "zone": "AllDay",
+          "energyPricePlnPerKwh": 0.6175,
+          "distributionVariablePlnPerKwh": 0.3031
+        }
+      ]
+    },
+    {
+      "id": "G12",
+      "zones": [
+        {
+          "zone": "Day",
+          "energyPricePlnPerKwh": 0.6740,
+          "distributionVariablePlnPerKwh": 0.3494
+        },
+        {
+          "zone": "Night",
+          "energyPricePlnPerKwh": 0.5141,
+          "distributionVariablePlnPerKwh": 0.0686
+        }
+      ]
+    },
+    {
+      "id": "G12w",
+      "zones": [
+        {
+          "zone": "Peak",
+          "energyPricePlnPerKwh": 0.7712,
+          "distributionVariablePlnPerKwh": 0.4057
+        },
+        {
+          "zone": "OffPeak",
+          "energyPricePlnPerKwh": 0.5141,
+          "distributionVariablePlnPerKwh": 0.0630
+        }
+      ]
+    },
+    {
+      "id": "G13",
+      "zones": [
+        {
+          "zone": "MorningPeak",
+          "energyPricePlnPerKwh": 0.5803,
+          "distributionVariablePlnPerKwh": 0.2710
+        },
+        {
+          "zone": "EveningPeak",
+          "energyPricePlnPerKwh": 0.9631,
+          "distributionVariablePlnPerKwh": 0.4795
+        },
+        {
+          "zone": "Remaining",
+          "energyPricePlnPerKwh": 0.5240,
+          "distributionVariablePlnPerKwh": 0.0482
+        }
+      ]
+    },
+    {
+      "id": "G13s",
+      "zones": [
+        {
+          "zone": "SummerWorkdayDayOffPeak",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.1230
+        },
+        {
+          "zone": "SummerWorkdayDayPeak",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.3496
+        },
+        {
+          "zone": "SummerWorkdayNight",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.1346
+        },
+        {
+          "zone": "SummerHolidayDayOffPeak",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.0492
+        },
+        {
+          "zone": "SummerHolidayDayPeak",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.1446
+        },
+        {
+          "zone": "SummerHolidayNight",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.1346
+        },
+        {
+          "zone": "WinterWorkdayDayOffPeak",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.2459
+        },
+        {
+          "zone": "WinterWorkdayDayPeak",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.4098
+        },
+        {
+          "zone": "WinterWorkdayNight",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.1346
+        },
+        {
+          "zone": "WinterHolidayDayOffPeak",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.1476
+        },
+        {
+          "zone": "WinterHolidayDayPeak",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.2411
+        },
+        {
+          "zone": "WinterHolidayNight",
+          "energyPricePlnPerKwh": 0.0,
+          "distributionVariablePlnPerKwh": 0.1346
+        }
+      ]
+    }
+  ],
+  "commonFees": {
+    "fixedNetworkFeeThreePhasePlnPerMonth": 13.36,
+    "subscriptionFeeMonthlyPlnPerMonth": 5.61,
+    "qualityFeePlnPerKwh": 0.0407,
+    "ozeFeePlnPerKwh": 0.0090,
+    "cogenerationFeePlnPerKwh": 0.0037,
+    "capacityFeeBrackets": [
+      { "minKwh": 0.0,    "maxKwh": 500.0,    "monthlyFeePln": 5.28  },
+      { "minKwh": 500.0,  "maxKwh": 1200.0,   "monthlyFeePln": 12.68 },
+      { "minKwh": 1200.0, "maxKwh": 2800.0,   "monthlyFeePln": 21.13 },
+      { "minKwh": 2800.0, "maxKwh": null,      "monthlyFeePln": 29.58 }
+    ]
+  }
+}
