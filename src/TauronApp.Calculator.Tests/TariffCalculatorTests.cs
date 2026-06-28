@@ -155,13 +155,14 @@ public sealed class TariffCalculatorTests
     [Theory]
     [InlineData(400, 5.28)]    // below 500
     [InlineData(500, 12.68)]   // 500–1200
-    [InlineData(1200, 21.13)]   // 1200–2800
-    [InlineData(2800, 29.58)]   // above 2800
-    [InlineData(5000, 29.58)]   // well above 2800
-    public void CapacityFee_SelectsCorrectBracket(double totalKwhDouble, double expectedMonthlyRateDouble)
+    [InlineData(1200, 21.13)]  // 1200–2800
+    [InlineData(2800, 29.58)]  // above 2800
+    [InlineData(5000, 29.58)]  // well above 2800
+    public void CapacityFee_SelectsCorrectBracket(double totalKwhRaw, double expectedMonthlyRateRaw)
     {
-        var totalKwh = (decimal)totalKwhDouble;
-        var expectedMonthlyRate = (decimal)expectedMonthlyRateDouble;
+        // decimal literals can't be used in [InlineData] — CS0182 (C# language restriction)
+        var totalKwh = (decimal)totalKwhRaw;
+        var expectedMonthlyRate = (decimal)expectedMonthlyRateRaw;
 
         var input = new CalculationInput(
             Year2026,
@@ -199,18 +200,18 @@ public sealed class TariffCalculatorTests
     private static IReadOnlyDictionary<TariffZone, decimal> G13sShares() =>
         new Dictionary<TariffZone, decimal>
         {
-            [TariffZone.SummerWorkdayDayPeak]    = 8.3m,
+            [TariffZone.SummerWorkdayDayPeak] = 8.3m,
             [TariffZone.SummerWorkdayDayOffPeak] = 8.3m,
-            [TariffZone.SummerWorkdayNight]      = 8.3m,
-            [TariffZone.SummerHolidayDayPeak]    = 8.3m,
+            [TariffZone.SummerWorkdayNight] = 8.3m,
+            [TariffZone.SummerHolidayDayPeak] = 8.3m,
             [TariffZone.SummerHolidayDayOffPeak] = 8.3m,
-            [TariffZone.SummerHolidayNight]      = 8.3m,
-            [TariffZone.WinterWorkdayDayPeak]    = 8.3m,
+            [TariffZone.SummerHolidayNight] = 8.3m,
+            [TariffZone.WinterWorkdayDayPeak] = 8.3m,
             [TariffZone.WinterWorkdayDayOffPeak] = 8.3m,
-            [TariffZone.WinterWorkdayNight]      = 8.3m,
-            [TariffZone.WinterHolidayDayPeak]    = 8.3m,
+            [TariffZone.WinterWorkdayNight] = 8.3m,
+            [TariffZone.WinterHolidayDayPeak] = 8.3m,
             [TariffZone.WinterHolidayDayOffPeak] = 8.3m,
-            [TariffZone.WinterHolidayNight]      = 8.7m, // 11×8.3 + 8.7 = 100.0
+            [TariffZone.WinterHolidayNight] = 8.7m, // 11×8.3 + 8.7 = 100.0
         };
 
     // ── 5.6 Catalog loading ───────────────────────────────────────────────────
