@@ -20,6 +20,14 @@ OpenSpec config is at `openspec/config.yaml`. Change artifacts live at `openspec
 
 Every change must be implemented on its own branch and merged into `main` via a pull request. Never commit directly to `main`. Branch names should reflect the change (e.g. `feature/tariff-calculator`, `fix/g12-zone-calc`). Each PR requires the CI check to pass and a codeowner approval before merging.
 
+## Code Quality
+
+Before committing any C# changes, run `dotnet format` on the solution to ensure consistent formatting:
+
+```bash
+dotnet format src/TauronApp.slnx
+```
+
 ## Domain Knowledge: TAURON Tariffs
 
 All 2026 tariff rates, time zones, and fee structures for Group G plans (G11, G12, G12w, G13, G13s) are documented in [`tarrifs/tauron_taryfy_2026.md`](tarrifs/tauron_taryfy_2026.md).

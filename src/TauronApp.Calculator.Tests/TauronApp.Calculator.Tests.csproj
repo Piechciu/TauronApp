@@ -10,7 +10,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
-    <ProjectReference Include="..\TauronApp\TauronApp.csproj" />
+    <ProjectReference Include="..\TauronApp.Calculator\TauronApp.Calculator.csproj" />
   </ItemGroup>
 
   <ItemGroup>
