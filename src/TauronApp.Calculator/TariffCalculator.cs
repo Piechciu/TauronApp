@@ -5,7 +5,6 @@ namespace TauronApp.Calculator;
 
 public sealed class TariffCalculator
 {
-    private const decimal ShareTolerance = 0.01m; // 1% tolerance for rounding
 
     private readonly RateCatalogProvider _catalogProvider;
 
@@ -81,12 +80,17 @@ public sealed class TariffCalculator
         {
             if (!knownZones.Contains(zone))
                 throw new ArgumentException($"Zone {zone} does not belong to tariff {tariff.Id}.");
+
+            if (share * 10m != Math.Floor(share * 10m))
+                throw new ArgumentException(
+                    $"Zone share for {zone} ({share}%) must have at most one decimal place.");
+
             total += share;
         }
 
-        if (Math.Abs(total - 100m) > ShareTolerance)
+        if (total != 100m)
             throw new ArgumentException(
-                $"Zone shares for tariff {tariff.Id} sum to {total:F4}% but must be within {ShareTolerance}% of 100%.");
+                $"Zone shares for tariff {tariff.Id} sum to {total:F1}% but must equal exactly 100%.");
     }
 
     private static decimal SelectCapacityBracket(decimal totalEnergyKwh, IReadOnlyList<CapacityBracket> brackets)

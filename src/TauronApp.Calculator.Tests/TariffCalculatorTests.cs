@@ -79,20 +79,34 @@ public sealed class TariffCalculatorTests
     }
 
     [Fact]
-    public void Validation_AcceptsSharesWithinTolerance()
+    public void Validation_AcceptsOneDecimalPlaceSharesSummingToExactly100()
     {
-        // 99.995% + 0.005% = 100.000% — within 1% tolerance
         var input = new CalculationInput(
             Year2026,
             1000m,
             new Dictionary<TariffZone, decimal>
             {
-                [TariffZone.Day] = 99.995m,
-                [TariffZone.Night] = 0.005m
+                [TariffZone.Day] = 99.9m,
+                [TariffZone.Night] = 0.1m
             });
 
         var ex = Record.Exception(() => _sut.Calculate(TariffId.G12, input));
         Assert.Null(ex);
+    }
+
+    [Fact]
+    public void Validation_RejectsSharesWithMoreThanOneDecimalPlace()
+    {
+        var input = new CalculationInput(
+            Year2026,
+            1000m,
+            new Dictionary<TariffZone, decimal>
+            {
+                [TariffZone.Day] = 66.67m,
+                [TariffZone.Night] = 33.33m
+            });
+
+        Assert.Throws<ArgumentException>(() => _sut.Calculate(TariffId.G12, input));
     }
 
     [Fact]
@@ -174,29 +188,30 @@ public sealed class TariffCalculatorTests
     [Fact]
     public void G13s_ZeroEnergyPrice_DistributionOnlyCost()
     {
-        // Spread 2400 kWh evenly across all 12 zones (200 kWh each = ~8.333% each)
-        var shares = new Dictionary<TariffZone, decimal>
-        {
-            [TariffZone.SummerWorkdayDayPeak] = 100m / 12m,
-            [TariffZone.SummerWorkdayDayOffPeak] = 100m / 12m,
-            [TariffZone.SummerWorkdayNight] = 100m / 12m,
-            [TariffZone.SummerHolidayDayPeak] = 100m / 12m,
-            [TariffZone.SummerHolidayDayOffPeak] = 100m / 12m,
-            [TariffZone.SummerHolidayNight] = 100m / 12m,
-            [TariffZone.WinterWorkdayDayPeak] = 100m / 12m,
-            [TariffZone.WinterWorkdayDayOffPeak] = 100m / 12m,
-            [TariffZone.WinterWorkdayNight] = 100m / 12m,
-            [TariffZone.WinterHolidayDayPeak] = 100m / 12m,
-            [TariffZone.WinterHolidayDayOffPeak] = 100m / 12m,
-            [TariffZone.WinterHolidayNight] = 100m / 12m,
-        };
-
-        var input = new CalculationInput(Year2026, 2400m, shares);
+        // 11 zones at 8.3% + 1 zone at 8.7% = 100.0% (all 1 decimal place)
+        var input = new CalculationInput(Year2026, 2400m, G13sShares());
         var result = _sut.Calculate(TariffId.G13s, input);
 
         Assert.Equal(0m, result.EnergyCost);
         Assert.True(result.DistributionCost > 0m);
     }
+
+    private static IReadOnlyDictionary<TariffZone, decimal> G13sShares() =>
+        new Dictionary<TariffZone, decimal>
+        {
+            [TariffZone.SummerWorkdayDayPeak]    = 8.3m,
+            [TariffZone.SummerWorkdayDayOffPeak] = 8.3m,
+            [TariffZone.SummerWorkdayNight]      = 8.3m,
+            [TariffZone.SummerHolidayDayPeak]    = 8.3m,
+            [TariffZone.SummerHolidayDayOffPeak] = 8.3m,
+            [TariffZone.SummerHolidayNight]      = 8.3m,
+            [TariffZone.WinterWorkdayDayPeak]    = 8.3m,
+            [TariffZone.WinterWorkdayDayOffPeak] = 8.3m,
+            [TariffZone.WinterWorkdayNight]      = 8.3m,
+            [TariffZone.WinterHolidayDayPeak]    = 8.3m,
+            [TariffZone.WinterHolidayDayOffPeak] = 8.3m,
+            [TariffZone.WinterHolidayNight]      = 8.7m, // 11×8.3 + 8.7 = 100.0
+        };
 
     // ── 5.6 Catalog loading ───────────────────────────────────────────────────
 
@@ -229,21 +244,7 @@ public sealed class TariffCalculatorTests
             [TariffId.G12] = new Dictionary<TariffZone, decimal> { [TariffZone.Day] = 70m, [TariffZone.Night] = 30m },
             [TariffId.G12w] = new Dictionary<TariffZone, decimal> { [TariffZone.Peak] = 60m, [TariffZone.OffPeak] = 40m },
             [TariffId.G13] = new Dictionary<TariffZone, decimal> { [TariffZone.MorningPeak] = 30m, [TariffZone.EveningPeak] = 30m, [TariffZone.Remaining] = 40m },
-            [TariffId.G13s] = new Dictionary<TariffZone, decimal>
-            {
-                [TariffZone.SummerWorkdayDayPeak] = 100m / 12m,
-                [TariffZone.SummerWorkdayDayOffPeak] = 100m / 12m,
-                [TariffZone.SummerWorkdayNight] = 100m / 12m,
-                [TariffZone.SummerHolidayDayPeak] = 100m / 12m,
-                [TariffZone.SummerHolidayDayOffPeak] = 100m / 12m,
-                [TariffZone.SummerHolidayNight] = 100m / 12m,
-                [TariffZone.WinterWorkdayDayPeak] = 100m / 12m,
-                [TariffZone.WinterWorkdayDayOffPeak] = 100m / 12m,
-                [TariffZone.WinterWorkdayNight] = 100m / 12m,
-                [TariffZone.WinterHolidayDayPeak] = 100m / 12m,
-                [TariffZone.WinterHolidayDayOffPeak] = 100m / 12m,
-                [TariffZone.WinterHolidayNight] = 100m / 12m,
-            }
+            [TariffId.G13s] = G13sShares()
         };
 
         var results = _sut.CalculateAll(Year2026, 2000m, allShares);
@@ -260,21 +261,7 @@ public sealed class TariffCalculatorTests
             [TariffId.G12] = new Dictionary<TariffZone, decimal> { [TariffZone.Day] = 70m, [TariffZone.Night] = 30m },
             [TariffId.G12w] = new Dictionary<TariffZone, decimal> { [TariffZone.Peak] = 60m, [TariffZone.OffPeak] = 40m },
             [TariffId.G13] = new Dictionary<TariffZone, decimal> { [TariffZone.MorningPeak] = 30m, [TariffZone.EveningPeak] = 30m, [TariffZone.Remaining] = 40m },
-            [TariffId.G13s] = new Dictionary<TariffZone, decimal>
-            {
-                [TariffZone.SummerWorkdayDayPeak] = 100m / 12m,
-                [TariffZone.SummerWorkdayDayOffPeak] = 100m / 12m,
-                [TariffZone.SummerWorkdayNight] = 100m / 12m,
-                [TariffZone.SummerHolidayDayPeak] = 100m / 12m,
-                [TariffZone.SummerHolidayDayOffPeak] = 100m / 12m,
-                [TariffZone.SummerHolidayNight] = 100m / 12m,
-                [TariffZone.WinterWorkdayDayPeak] = 100m / 12m,
-                [TariffZone.WinterWorkdayDayOffPeak] = 100m / 12m,
-                [TariffZone.WinterWorkdayNight] = 100m / 12m,
-                [TariffZone.WinterHolidayDayPeak] = 100m / 12m,
-                [TariffZone.WinterHolidayDayOffPeak] = 100m / 12m,
-                [TariffZone.WinterHolidayNight] = 100m / 12m,
-            }
+            [TariffId.G13s] = G13sShares()
         };
 
         var results = _sut.CalculateAll(Year2026, 2000m, allShares);
