@@ -1,7 +1,143 @@
-﻿@page "/"
+@page "/"
+@using TauronApp.Calculator.Domain
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Kalkulator taryf TAURON</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Kalkulator taryf TAURON</h1>
+<p>Podaj zużycie energii i porównaj roczny koszt w każdej taryfie grupy G.</p>
 
-Welcome to your new app.
+<div class="inputs">
+    <RadzenFormField Text="Rok rozliczeniowy" Variant="Variant.Outlined">
+        <RadzenNumeric TValue="int" Value="@_year" ValueChanged="@OnYearChanged" Min="2026" Max="2026" />
+    </RadzenFormField>
+
+    <RadzenFormField Text="Roczne zużycie energii (kWh)" Variant="Variant.Outlined">
+        <RadzenNumeric TValue="decimal?" Value="@_totalEnergyKwh" ValueChanged="@OnTotalEnergyChanged" Min="0" />
+    </RadzenFormField>
+</div>
+
+@if (!GlobalInputValid)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" ShowIcon="true" AllowClose="false">
+        Podaj prawidłowe roczne zużycie energii (liczba nieujemna), aby zobaczyć koszty.
+    </RadzenAlert>
+}
+
+<div class="cards">
+    @foreach (var result in _ordered)
+    {
+        var tariff = result.TariffId;
+        var isCheapest = result.IsValid && CheapestTariff == tariff;
+        var expanded = IsExpanded(tariff);
+
+        <RadzenCard Variant="Variant.Outlined" class="@($"tariff-card{(isCheapest ? " cheapest" : string.Empty)}")">
+            <div class="tariff-card-header" @onclick="@(() => ToggleExpanded(tariff))">
+                <div class="tariff-card-title">
+                    <RadzenIcon Icon="@(expanded ? "expand_less" : "expand_more")" />
+                    <span class="tariff-name">@TariffName(tariff)</span>
+                    @if (isCheapest)
+                    {
+                        <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="Najtańsza" />
+                    }
+                </div>
+                <div class="tariff-total">
+                    @if (result.IsValid)
+                    {
+                        <strong>@Money(result.Breakdown!.Total)</strong>
+                    }
+                    else
+                    {
+                        <span class="tariff-invalid">—</span>
+                    }
+                </div>
+            </div>
+
+            @if (expanded)
+            {
+                <div class="tariff-card-body">
+                    @if (result.IsValid)
+                    {
+                        var b = result.Breakdown!;
+                        <RadzenText TextStyle="TextStyle.Subtitle2">Składniki kosztu (rocznie)</RadzenText>
+                        <table class="breakdown">
+                            <tbody>
+                                <tr><td>Energia czynna</td><td>@Money(b.EnergyCost)</td></tr>
+                                <tr><td>Dystrybucja (zmienna)</td><td>@Money(b.DistributionCost)</td></tr>
+                                <tr><td>Opłaty doliczane (jakościowa, OZE, kogeneracyjna)</td><td>@Money(b.Surcharges)</td></tr>
+                                <tr><td>Opłaty stałe (sieciowa, abonamentowa)</td><td>@Money(b.FixedFees)</td></tr>
+                                <tr><td>Opłata mocowa</td><td>@Money(b.CapacityFee)</td></tr>
+                                <tr class="breakdown-total"><td>Razem</td><td>@Money(b.Total)</td></tr>
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <RadzenAlert AlertStyle="AlertStyle.Warning" Variant="Variant.Flat" ShowIcon="true" AllowClose="false">
+                            @result.Error
+                        </RadzenAlert>
+                    }
+
+                    <RadzenText TextStyle="TextStyle.Subtitle2" class="shares-title">
+                        Udział stref (%) — suma musi wynosić 100% (obecnie @($"{ShareSum(tariff):0.#}")%)
+                    </RadzenText>
+                    @if (IsGrouped(tariff))
+                    {
+                        @foreach (var group in ZoneGroups(tariff))
+                        {
+                            <div class="share-group">
+                                <RadzenText TextStyle="TextStyle.Caption" class="share-group-title">@group.Key</RadzenText>
+                                <div class="shares">
+                                    @foreach (var zone in group)
+                                    {
+                                        var z = zone;
+                                        <RadzenFormField Text="@PeriodLabel(z)" Variant="Variant.Outlined" class="share-field">
+                                            <RadzenNumeric TValue="decimal"
+                                                           Value="@_shares[tariff][z]"
+                                                           ValueChanged="@(v => OnShareChanged(tariff, z, v))"
+                                                           Min="0" Max="100" Step="0.1" Format="0.#" />
+                                        </RadzenFormField>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="shares">
+                            @foreach (var zone in _zonesByTariff[tariff])
+                            {
+                                var z = zone;
+                                <RadzenFormField Text="@ZoneName(z)" Variant="Variant.Outlined" class="share-field">
+                                    <RadzenNumeric TValue="decimal"
+                                                   Value="@_shares[tariff][z]"
+                                                   ValueChanged="@(v => OnShareChanged(tariff, z, v))"
+                                                   Min="0" Max="100" Step="0.1" Format="0.#" />
+                                </RadzenFormField>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </RadzenCard>
+    }
+</div>
+
+@if (ValidResults.Count > 0)
+{
+    <div class="chart">
+        <RadzenText TextStyle="TextStyle.H6">Porównanie rocznego kosztu</RadzenText>
+        <RadzenChart>
+            <RadzenColumnSeries Data="@ChartData" CategoryProperty="Tariff" ValueProperty="Total" Title="Roczny koszt (zł)">
+                <RadzenSeriesDataLabels Visible="true" />
+            </RadzenColumnSeries>
+            <RadzenColumnOptions Radius="2" />
+            <RadzenValueAxis>
+                <RadzenGridLines Visible="true" />
+                <RadzenAxisTitle Text="Roczny koszt (zł)" />
+            </RadzenValueAxis>
+            <RadzenCategoryAxis>
+                <RadzenAxisTitle Text="Taryfa" />
+            </RadzenCategoryAxis>
+        </RadzenChart>
+    </div>
+}
