@@ -15,6 +15,18 @@ public sealed class TariffCalculator
         _catalogProvider = catalogProvider;
     }
 
+    /// <summary>
+    /// Returns the zones that belong to each tariff for the given year, so callers can
+    /// build zone-share inputs without hard-coding which zones each tariff exposes.
+    /// </summary>
+    public IReadOnlyDictionary<TariffId, IReadOnlyList<TariffZone>> GetTariffZones(int year)
+    {
+        var catalog = _catalogProvider.GetCatalog(year);
+        return catalog.Tariffs.ToDictionary(
+            kvp => kvp.Key,
+            kvp => (IReadOnlyList<TariffZone>)kvp.Value.Zones.Select(z => z.Zone).ToList());
+    }
+
     public CostBreakdown Calculate(TariffId tariffId, CalculationInput input)
     {
         var catalog = _catalogProvider.GetCatalog(input.Year);
